@@ -1,0 +1,51 @@
+alert('sdf');
+"use strict";
+
+// This function is called when any image tag fails to load.
+function fixMIME()
+{
+
+  var img = this;
+
+  // First of all, try to guess the MIME type based on the file extension.
+  var mime;
+  switch (img.src.toLowerCase().slice(-4))
+  {
+    case ".bmp":              mime = "bmp";     break;
+    case ".gif":              mime = "gif";     break;
+    case ".jpg": case "jpeg": mime = "jpeg";    break;
+    case ".png": case "apng": mime = "png";     break;
+    case ".svg": case "svgz": mime = "svg+xml"; break;
+    case ".tif": case "tiff": mime = "tiff";    break;
+    default: console.log("Unknown file extension: " + img.src); return;
+  }
+  console.log("Couldn't load " + img.src + "; retrying as image/" + mime);
+
+  // Attempt to download the image data via an XMLHttpRequest.
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function()
+  {
+    if (this.status != 200) { return console.log("FAILED: " + img.src); }
+    // Blob > ArrayBuffer: http://stackoverflow.com/a/15981017/4200092
+    var reader = new FileReader();
+    reader.onload = function()
+    {
+      // TypedArray > Base64 text: http://stackoverflow.com/a/12713326/4200092
+      var data = String.fromCharCode.apply(null, new Uint8Array(this.result));
+      img.src = "data:image/" + mime + ";base64," + btoa(data);
+    };
+    reader.readAsArrayBuffer(this.response);
+  };
+  xhr.open("get", this.src, true);
+  xhr.responseType = "blob";
+  xhr.send();
+
+}
+
+// This callback happens after the DOCUMENT is loaded but before IMAGES are.
+document.addEventListener("readystatechange", function() {
+  if (document.readyState != "interactive") { return; }
+  // Add an error handler callback to all image tags in the document.
+  var t = document.getElementsByTagName("img");
+  for (var i = 0; i < t.length; ++i) { t[i].addEventListener("error", fixMIME, false); }
+}, false);

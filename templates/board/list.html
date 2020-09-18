@@ -1,0 +1,63 @@
+{%extends '../base/base.html' %}
+
+{% block css_link %}
+<link href="/assets/css/board.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% load mathfilters %}
+
+{% block content %}
+		<div id="content">
+			<div id="board">
+				<form id="search_form" action="" method="post">
+					<input type="text" id="kwd" name="kwd" value="">
+					<input type="submit" value="찾기">
+				</form>
+				<table class="tbl-ex">
+					<tr>
+						<th>번호</th>
+						<th>제목</th>
+						<th>글쓴이</th>
+						<th>조회수</th>
+						<th>작성일</th>
+						<th>&nbsp;</th>
+					</tr>
+					{% for board in board_list %}
+					<tr id ={{ board.no }}>
+						<td> {{board_list | length | sub:forloop.counter |add:1 }}</td>
+						<td><a href="/board/view?no={{board.no}}&&g_no={{board.g_no}}">{{ board.context}}</a></td>
+						<td>{{board.user_id}}</td>
+						<td>{{board.hit}}</td>
+						<td>{{board.register_date}}</td>
+						<td><a href="/board/delete?no={{board.no}}" class="del">삭제</a></td>
+					</tr>
+					{% endfor %}
+				</table>
+				<div class="bottom">
+					<!-- pager 추가 -->
+				<div class="pager">
+					<ul>
+						<li><a href="/board?page_no={{page_no | sub:5}}" >◀ </a> </li>
+						{% for page_num in page_arr %}
+						{% if request.session.page_no !=  page_num %}
+						<li><a href="/board?page_no={{page_num}}"> {{page_num}} </a></li>
+						{% else %}
+						<li class="selected"> {{page_num}}</li>
+						{% endif %}
+						{% endfor %}
+						<li><a href="/board?page_no={{page_no |add:5}}" >▶</a></li>
+					</ul>
+				</div>
+					{% if request.session.user_info != None %}
+					<a href="/board/write?g_no=0" id="new-book">글쓰기</a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+<script type="application/javascript">
+	function addComment(no, g_no, o_no){
+		var x = document.getElementById(no);
+		x.insertBefore();
+	}
+</script>
+{% endblock %}

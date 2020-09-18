@@ -1,0 +1,36 @@
+{%extends '../base/base.html' %}
+{% block css_link %}
+<link href="/assets/css/board.css" rel="stylesheet" type="text/css">
+{% endblock %}
+{% block content %}
+		<div id="content">
+			<div id="board" class="board-form">
+				<table class="tbl-ex">
+					<tr>
+						<th colspan="2">글보기</th>
+					</tr>
+					<tr>
+						<td class="label">제목</td>
+						<td>{{board.title}}</td>
+					</tr>
+					<tr>
+						<td class="label">내용</td>
+						<td>
+							<div class="view-content">
+								{{board.context | linebreaksbr}}
+							</div>
+						</td>
+					</tr>
+				</table>
+				<div class="bottom">
+					<a href="/board">글목록</a>
+					{% if request.session.user_info.no != None %}
+					<a href="/board/write?g_no={{board.g_no}}">답글작성</a>
+					{% endif %}
+					{% if request.session.user_info.no == board.user_no %}
+					<a href="/board/modify?no={{board.no}}">글수정</a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+{% endblock %}

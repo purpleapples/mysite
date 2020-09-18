@@ -1,0 +1,29 @@
+{%extends '../base/base.html' %}
+{% block css_link %}
+<link href="/assets/css/user.css" rel="stylesheet" type="text/css">
+{% endblock %}
+{% block content %}
+		<div id="content">
+			<div id="user">
+
+				<form id="join-form" name="joinForm" method="POST" action="/user/update">
+					<input type="hidden" name="no" value="{{request.session.user_info.no}}"/>
+					{% csrf_token %}
+					<label class="block-label" for="name">이름</label>
+					<input id="name" name="name" type="text" value="{{request.session.user_info.name}}">
+
+					<label class="block-label">패스워드</label>
+					<input name="password" type="password" value="">
+					
+					<fieldset>
+						<legend>성별</legend>
+						<label>여</label> <input type="radio" name="gender" value="f" checked={%if request.session.user_info.gender == f%} {{ "checked"}} {% endif%}>
+						<label>남</label> <input type="radio" name="gender" value="m" checked={%if request.session.user_info.gender == m%} {{ "checked"}} {% endif%}>
+					</fieldset>
+
+					<input type="submit" value="수정">
+					
+				</form>
+			</div>
+		</div>
+{% endblock %}
