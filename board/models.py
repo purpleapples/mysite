@@ -33,6 +33,7 @@ def count():
 def fetchlist(page_no):
     db = conn()
     cursor = db.cursor(DictCursor)
+    page_no = page_no * 5
     sql = """select no,
                     title,
                     context,
@@ -48,8 +49,9 @@ def fetchlist(page_no):
                     date_format(register_ymdt, "%Y-%m-%d_%h:%i:%s") as register_date                     
                from board 
            order by g_no desc, o_no asc
-           limit {page_no}, 5""".format(page_no=page_no)
+           limit {page_no} , 5""".format(page_no=page_no)
     cursor.execute(sql)
+    print(sql)
     result = cursor.fetchall()
     db.commit()
     cursor.close()

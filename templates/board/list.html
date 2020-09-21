@@ -28,7 +28,7 @@
 						<td  style="padding-left:{{board.depth |sub:2 |mul:20}}px">
 							{% if board.depth != 1 %}
 							<img src="/assets/images/reply.png"/>
-							{% endif %}<a href="/board/view?no={{board.no}}&&g_no={{board.g_no}}">{{ board.context}}</a></td>
+							{% endif %}<a href="/board/view?no={{board.no}}&g_no={{board.g_no}}">{{ board.context}}</a></td>
 						<td>{{board.user_id}}</td>
 						<td>{{board.hit}}</td>
 						<td>{{board.register_date}}</td>

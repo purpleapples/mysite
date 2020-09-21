@@ -25,7 +25,7 @@
 				<div class="bottom">
 					<a href="/board">글목록</a>
 					{% if request.session.user_info.no != None %}
-					<a href="/board/write?g_no={{board.g_no}}&parent_no=board.no">답글작성</a>
+					<a href="/board/write?g_no={{board.g_no}}&parent_no={{board.no}}&depth={{board.depth | add:1}}">답글작성</a>
 					{% endif %}
 					{% if request.session.user_info.no == board.user_no %}
 					<a href="/board/modify?no={{board.no}}">글수정</a>

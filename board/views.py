@@ -21,7 +21,11 @@ def list(request):
         page_no = max(page_arr)
 
     # page list 생성
-    page_arr = page_arr[page_no: page_no+5]
+
+    if page_no < 5:
+        page_arr = page_arr[:page_no]
+    else:
+        page_arr = page_arr[page_no: page_no + 5]
     board_list = models.fetchlist(page_no)
 
     #  글쓰기 취소 시 사용
@@ -63,7 +67,11 @@ def view(request):
 
 
 def write(request):
-    return render(request, "board/write.html")
+    g_no = request.GET['g_no']
+    parent_no = request.GET['parent_no']
+    depth = request.GET['depth']
+    data = {'g_no': g_no, 'parent_no': parent_no, 'depth': depth}
+    return render(request, "board/write.html", data)
 
 
 def insert(request):
@@ -91,5 +99,5 @@ def get_page_arr():
     page_count = (count // 5) if count % 5 == 0 else (count // 5) + 1
 
 
-    page_arr = [*range(0, page_count+1)]
+    page_arr = [*range(1, page_count+1)]
     return page_arr
