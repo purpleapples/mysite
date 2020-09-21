@@ -59,13 +59,32 @@ def fetchlist(page_no):
 
 def select_order(board_info: dict) -> int:
     db = conn()
-    cursor = db.cursor()
-    sql = """ select max(order_no) as order_no
-                from board
-                where g_no = {g_no}
-                  and depth = {depth}""".format_map(board_info)
-    cursor.execute(sql)
-    result = cursor.fetchone()
+    cursor = db.cursor(DictCursor)
+    if board_info['g_no'] != 0:
+        sql = """ select min(o_no) as o_no
+                    from board
+                   where 1=1
+                     and depth = (select depth 
+                                    from board
+                                   where 1=1
+                                     and no = {parent_no} )
+                     and o_no >  (select o_no
+                                     from board
+                                    where 1=1
+                                      and no = {parent_no} ) """.format_map(board_info)
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        if result['o_no'] is None:
+            sql = """select max(o_no)
+                                 from board"""
+        cursor.execute(sql)
+        result = cursor.fetchone()
+    else:
+        sql = """select max(o_no)
+                   from board"""
+        cursor.execute(sql)
+        result = cursor.fetchone()
+
     cursor.close()
     db.close()
     return result
@@ -75,10 +94,9 @@ def update_order(board_info: dict) -> dict:
     db = conn()
     cursor = db.cursor()
     sql = """ update board
-                 set order = order +1
+                 set o_no = o_no +1
                  where 1=1 
-                   and g_no = {g_no}
-                   and order  > {order}
+                   and o_no  >= {o_no}
                  """.format_map(board_info)
     result = cursor.execute(sql)
     db.commit()
@@ -90,7 +108,6 @@ def update_order(board_info: dict) -> dict:
 def insert(board_info: dict):
     sql = """"""
     if board_info["g_no"] != 0:
-        result = update_order(board_info)
         sql = """ insert 
                     into board (title, context, user_no, g_no, depth, o_no, register_ytdt, update_ymdt)
                     values(

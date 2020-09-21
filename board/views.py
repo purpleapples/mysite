@@ -67,12 +67,15 @@ def write(request):
 
 
 def insert(request):
+    # 1. 업데이트할 순서 번호 찾기
+    # 2. 업데이트할 순서번호 부터 +1
+    # 3. 순서 번호로 insert
     obj = request.POST.dict()
     obj.pop("csrfmiddlewaretoken")
     order_no = models.select_order(obj)
-    obj["order_no"] = order_no
+    obj["o_no"] = order_no
     result = models.update_order(obj)
-    obj["order_no"] = int(order_no) + 1
+    obj["o_no"] = int(order_no) + 1
     result = models.insert(obj)
     return HttpResponseRedirect("/board")
 

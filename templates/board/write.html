@@ -9,6 +9,7 @@
 					{% csrf_token %}
 					<input type="hidden" name = "user_no" value="{{request.session.user_info.no}}">
 					<input type="hidden" name = "g_no" value="{{g_no}}">
+					<input type="hidden" name = "parent_no" value="{{parent_no}}">
 					<table class="tbl-ex">
 						<tr>
 							<th colspan="2">글쓰기</th>
