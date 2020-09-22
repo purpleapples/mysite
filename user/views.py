@@ -39,10 +39,15 @@ def loginform(request):
 def login(request):
     obj = request.POST.dict()
     obj.pop("csrfmiddlewaretoken")
-    user_info = models.login(obj)[0]
-    request.session['user_info'] = user_info
-
-    return HttpResponseRedirect("/main")
+    result = models.login(obj)
+    user_info = ""
+    if len(result) == 0:
+        data = {"login_result": 0}
+        return render(request, "user/loginform.html", data)
+    else:
+        user_info = models.login(obj)[0]
+        request.session['user_info'] = user_info
+        return HttpResponseRedirect("/main")
 
 
 def logout(request):

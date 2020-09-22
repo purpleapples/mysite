@@ -23,6 +23,7 @@ def count():
     sql = """select count(no)  as count            
                    from board 
                """
+    print(sql)
     cursor.execute(sql)
     result = cursor.fetchone()
     cursor.close()
@@ -33,7 +34,7 @@ def count():
 def fetchlist(page_no):
     db = conn()
     cursor = db.cursor(DictCursor)
-    page_no = page_no * 5
+    page_no = (int(page_no)-1) * 5
     sql = """select no,
                     title,
                     context,
@@ -62,45 +63,45 @@ def fetchlist(page_no):
 def select_order(board_info: dict) -> int:
     db = conn()
     cursor = db.cursor(DictCursor)
-    if board_info['g_no'] != 0:
-        sql = """ select min(o_no) as o_no
-                    from board
-                   where 1=1
-                     and depth = (select depth 
-                                    from board
-                                   where 1=1
-                                     and no = {parent_no} )
-                     and o_no >  (select o_no
-                                     from board
-                                    where 1=1
-                                      and no = {parent_no} ) """.format_map(board_info)
-        cursor.execute(sql)
-        result = cursor.fetchone()
-        if result['o_no'] is None:
-            sql = """select max(o_no)
+
+    sql = """ select min(o_no) as o_no
+                from board
+               where 1=1
+                 and depth = (select depth 
+                                from board x
+                               where 1=1
+                                 and no = {parent_no} )
+                 and o_no >  (select o_no
+                                 from board y
+                                where 1=1
+                                  and no = {parent_no} ) """.format_map(board_info)
+    cursor.execute(sql)
+    result = cursor.fetchone()
+    if result['o_no'] is None:
+        sql = """select max(o_no)  as o_no 
                                  from board"""
         cursor.execute(sql)
         result = cursor.fetchone()
+        update_yn = False
     else:
-        sql = """select max(o_no)
-                   from board"""
-        cursor.execute(sql)
-        result = cursor.fetchone()
-
+        update_yn = True
+    print("board select order query", sql)
     cursor.close()
     db.close()
-    return result
+    return result, update_yn
 
 
-def update_order(board_info: dict) -> dict:
+def update_order(o_no: int) -> dict:
     db = conn()
     cursor = db.cursor()
+
     sql = """ update board
                  set o_no = o_no +1
                  where 1=1 
                    and o_no  >= {o_no}
-                 """.format_map(board_info)
+                 """.format(o_no=o_no)
     result = cursor.execute(sql)
+    print("board update_order query", sql)
     db.commit()
     cursor.close()
     db.close()
@@ -108,37 +109,49 @@ def update_order(board_info: dict) -> dict:
 
 
 def insert(board_info: dict):
-    sql = """"""
-    if board_info["g_no"] != 0:
-        sql = """ insert 
-                    into board (title, context, user_no, g_no, depth, o_no, register_ytdt, update_ymdt)
-                    values(
-                    "{title}",
-                    "{context}",
-                    {user_no},
-                    {g_no},
-                    {depth},
-                    {o_no},
-                    sysdate()
-                    sysdate()
-                    )""".format_map(board_info)
-    else:
-        sql = """insert 
-               into board ( title, context, user_no, g_no, depth, o_no, register_ymdt, update_ymdt)
+
+    sql = """insert 
+              into board ( title, context, user_no, g_no, depth, o_no, register_ymdt, update_ymdt)
+               values(
+                       "{title}",
+                       "{context}",
+                       '{user_no}',
+                       ifnull((select max(g_no) +1 
+                                 from board
+                                where 1=1), 1) as g_no,
+                       1 as depth,
+                       ifnull((select max(o_no) +1
+                                from board
+                                where 1=1),1 ) as o_no,
+                       sysdate(),
+                       sysdate()                        
+               )""".format_map(board_info)
+    print("board insert query", sql)
+    db = conn()
+    cursor = db.cursor()
+    result = cursor.execute(sql)
+    db.commit()
+    cursor.close()
+    db.close()
+    return result
+
+
+def insertReply(board_info: dict):
+
+    sql = """ insert 
+                into board (title, context, user_no, g_no, depth, o_no, hit, register_ymdt, update_ymdt)
                 values(
-                        "{title}",
-                        "{context}",
-                        '{user_no}',
-                        (select max(g_no) +1 
-                           from board
-                          where 1=1)
-                        1 as depth,
-                        (select max(o_no) 
-                          from board
-                          where 1=1) as o_no,
-                        sysdate(),
-                        sysdate()                        
+                "{title}",
+                "{context}",
+                {user_no},
+                {g_no},
+                {depth},
+                {o_no},
+                0,
+                sysdate(),
+                sysdate()
                 )""".format_map(board_info)
+    print("board insert query", sql)
     db = conn()
     cursor = db.cursor()
     result = cursor.execute(sql)

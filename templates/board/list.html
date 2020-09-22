@@ -25,10 +25,12 @@
 					{% for board in board_list %}
 					<tr id ={{ board.no }}  >
 						<td id = "board{{board.no}}"> {{board_list | length | sub:forloop.counter |add:1 }}</td>
-						<td  style="padding-left:{{board.depth |sub:2 |mul:20}}px">
+						<td  style="text-align:left;padding-left:{{board.depth |sub:2 |mul:20}}px">
 							{% if board.depth != 1 %}
 							<img src="/assets/images/reply.png"/>
-							{% endif %}<a href="/board/view?no={{board.no}}&g_no={{board.g_no}}">{{ board.context}}</a></td>
+							{% endif %}
+							<a href="/board/view?no={{board.no}}&g_no={{board.g_no}}&parent_no={{board.no}}&depth={{board.depth}}">{{ board.title }}</a>
+						</td>
 						<td>{{board.user_id}}</td>
 						<td>{{board.hit}}</td>
 						<td>{{board.register_date}}</td>
