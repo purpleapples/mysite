@@ -216,12 +216,35 @@ def select_one(no: int):
 
 
 def delete(no: int):
+    # 댓글 삭제 기능 추가
+    # 1. 본인이 부모인지 여부
+    # 2. 부모이면 댓글 전부 삭제
+    # 3. 아니면 본인만 삭제
     db = conn()
-    cursor = db.cursor()
-    sql = """delete 
-               from board
-              where 1=1
-                and no={no}""".format(no=no)
+    cursor = db.cursor(DictCursor)
+    sql = """ select depth, g_no, o_no, 
+                from board
+               where 1=1
+                 and no={no}""".format(no=no)
+    result = cursor.execute(sql)
+    obj = cursor.fetchone()
+    depth = obj['depth']
+
+    if depth == 1:
+        sql = """delete 
+                   from board 
+                  where 1=1
+                    and g_no = {g_no}""".format(g_no=obj['g_no'])
+    else:
+        sql = """delete 
+                   from board
+                  where 1=1
+                    and o_no between {o_no} and (select min(o_no)  
+                                                   from board  x
+                                                  where 1=1
+                                                    and depth={depth}
+                                                    and g_no={g_no}
+                                                    and o_no > {o_no}) -1 """.format_map(obj)
     result = cursor.execute(sql)
     db.commit()
     cursor.close()
